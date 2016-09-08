@@ -29,4 +29,12 @@ class CurrencyDetectorTest extends Specification {
 		then:
 		assert type == CoinType.DIME
 	}
+
+	def "analyzeCoin when a nickel is inserted it is recognized"() {
+		when:
+		CoinType type = detector.analyzeCoin(5, 21.21, 1.95)
+
+		then:
+		assert type == CoinType.NICKEL
+	}
 }

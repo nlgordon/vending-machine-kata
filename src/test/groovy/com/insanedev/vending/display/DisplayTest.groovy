@@ -22,6 +22,7 @@ class DisplayTest extends Specification {
 
 		then:
 		assert display.balance == CoinType.QUARTER.value
+		assert display.display == "0.25"
 	}
 
 	def "insertCoin when a coin is not detected, no value is added to the current balance"() {
@@ -34,5 +35,15 @@ class DisplayTest extends Specification {
 
 		then:
 		assert display.balance == CoinType.QUARTER.value
+		assert display.display == 'INSERT COIN'
 	}
+
+	def "display defaults to 'INSERT COIN' on the display"() {
+		when:
+		display
+
+		then:
+		assert display.display == 'INSERT COIN'
+	}
+
 }

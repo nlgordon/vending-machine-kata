@@ -5,15 +5,21 @@ import com.insanedev.vending.currency.CurrencyDetector
 
 class Display {
 
+	// References to other application modules
 	CurrencyDetector detector = null
 
+	// State variables
 	BigDecimal balance = 0;
+	String display = "INSERT COIN"
 
 	void insertCoin(BigDecimal weight, BigDecimal diameter, BigDecimal thickness) {
 		CoinType type = detector.analyzeCoin(weight, diameter, thickness)
 
 		if (type) {
 			balance += type.value
+			display = balance.toString()
+		} else {
+			display = "INSERT COIN"
 		}
 	}
 }

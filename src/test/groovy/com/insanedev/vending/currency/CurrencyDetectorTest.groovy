@@ -19,4 +19,14 @@ class CurrencyDetectorTest extends Specification {
 		then:
 		assert type == CoinType.QUARTER
 	}
+
+	def "analyzeCoin when a dime is inserted it is recognized"() {
+		setup:
+
+		when:
+		CoinType type = detector.analyzeCoin(2.268, 17.91, 1.35)
+
+		then:
+		assert type == CoinType.DIME
+	}
 }

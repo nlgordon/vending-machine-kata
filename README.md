@@ -27,3 +27,6 @@ Nickel  | 5.000g    | 21.21mm  | 1.95mm
 Dime    | 2.268g    | 17.91mm  | 1.35mm
 Quarter | 5.670g    | 24.26mm  | 1.75mm
 
+## Build Environment
+* Travis CI: https://travis-ci.org/nlgordon/vending-machine-kata
+

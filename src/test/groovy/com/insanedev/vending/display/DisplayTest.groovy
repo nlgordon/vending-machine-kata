@@ -14,6 +14,8 @@ class DisplayTest extends Specification {
 		display.detector = Mock(CurrencyDetector)
 		display.detector.analyzeCoin(_, _, _) >> CoinType.QUARTER
 		display.addProduct("A", new Product(name: "Cola", price: 1.00))
+		display.addProduct("B", new Product(name: "Chips", price: 0.5))
+		display.addProduct("C", new Product(name: "Candy", price: 0.65))
 	}
 
 	def "insertCoin when a coin is detected, its value is added to the current balance"() {
@@ -24,7 +26,7 @@ class DisplayTest extends Specification {
 		assert display.balance == CoinType.QUARTER.value
 		assert display.display == "0.25"
 		assert display.balance == 0.25
-		assert display.coinReturnCount == 0
+		assert display.coinReturn.size == 0
 	}
 
 	def "insertCoin when a coin is not detected, no value is added to the current balance"() {
@@ -37,7 +39,8 @@ class DisplayTest extends Specification {
 		assert display.balance == CoinType.QUARTER.value
 		assert display.display == 'INSERT COIN'
 		assert display.display == '0.25'
-		assert display.coinReturnCount == 1
+		assert display.coinReturn.size == 1
+		assert display.coinReturn[0] == null
 	}
 
 	def "display defaults to 'INSERT COIN' on the display"() {
@@ -59,10 +62,7 @@ class DisplayTest extends Specification {
 
 	def "if the price of the product selected equals the balance, dispense the product"() {
 		setup:
-		addQuarter()
-		addQuarter()
-		addQuarter()
-		addQuarter()
+		display.balance = 1.0
 
 		when:
 		display.selectProduct("A")
@@ -75,7 +75,18 @@ class DisplayTest extends Specification {
 		display.dispensedProducts[0].name == 'Cola'
 	}
 
-	void addQuarter() {
-		display.insertCoin(CoinType.QUARTER.weight, CoinType.QUARTER.diameter, CoinType.QUARTER.thickness)
+	def "after a product is dispensed that cost less than the balance, make change into the coin return"() {
+		setup:
+		display.balance = 1.05
+
+		when:
+		display.selectProduct("C")
+
+		then:
+		display.balance == 0
+		display.coinReturn.size == 3
+		display.coinReturn[0] == CoinType.QUARTER
+		display.coinReturn[1] == CoinType.DIME
+		display.coinReturn[2] == CoinType.NICKEL
 	}
 }

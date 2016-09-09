@@ -20,7 +20,7 @@ class Display {
 	BigDecimal balance = 0
 	String display = "INSERT COIN"
 	String nextDisplay = null
-	Integer coinReturnCount = 0
+	List<CoinType> coinReturn = []
 	List<Product> dispensedProducts = []
 
 	void insertCoin(BigDecimal weight, BigDecimal diameter, BigDecimal thickness) {
@@ -31,12 +31,12 @@ class Display {
 			display = balance.toString()
 		} else {
 			display = "INSERT COIN"
-			sendToCoinReturn()
+			sendToCoinReturn(null)
 		}
 	}
 
-	void sendToCoinReturn() {
-		coinReturnCount++
+	void sendToCoinReturn(CoinType coin) {
+		coinReturn << coin
 	}
 
 	void selectProduct(String button) {
@@ -49,12 +49,27 @@ class Display {
 			balance -= product.price
 			display = 'THANK YOU'
 			dispenseProduct(product)
+			makeChange()
 		}
 	}
 
 	void dispenseProduct(Product product) {
 		log.info("Dispensing ${product.name}")
 		dispensedProducts << product
+	}
+
+	void makeChange() {
+		if (balance == 0) {
+			return
+		}
+
+		List<CoinType> sortedCoins = CoinType.collect { it }.sort { a, b -> a.value <=> b.value }.reverse()
+
+		while (balance > 0) {
+			CoinType change = sortedCoins.find { it.value <= balance }
+			balance -= change.value
+			coinReturn << change
+		}
 	}
 
 	void addProduct(String button, Product product) {

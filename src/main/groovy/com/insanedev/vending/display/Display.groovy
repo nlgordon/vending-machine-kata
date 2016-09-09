@@ -18,7 +18,8 @@ class Display {
 
 	// State variables
 	BigDecimal balance = 0
-	String display = "INSERT COIN"
+	List<CoinType> balanceCoins = []
+	String display = null
 	String nextDisplay = null
 	List<CoinType> coinReturn = []
 	List<Product> dispensedProducts = []
@@ -28,9 +29,10 @@ class Display {
 
 		if (type) {
 			balance += type.value
+			balanceCoins << type
 			display = balance.toString()
 		} else {
-			display = "INSERT COIN"
+			display = null
 			sendToCoinReturn(null)
 		}
 	}
@@ -47,6 +49,7 @@ class Display {
 			display = "PRICE " + formatter.format(product.price)
 		} else {
 			balance -= product.price
+			balanceCoins = []
 			display = 'THANK YOU'
 			dispenseProduct(product)
 			makeChange()
@@ -77,7 +80,7 @@ class Display {
 	}
 
 	String getDisplay() {
-		String ret = display
+		String ret = display ? display : 'INSERT COIN'
 		if (nextDisplay) {
 			display = nextDisplay
 			nextDisplay = null
@@ -85,9 +88,16 @@ class Display {
 			if (balance) {
 				display = balance.toString()
 			} else {
-				display = 'INSERT COIN'
+				display = null
 			}
 		}
 		return ret
+	}
+
+	void returnMoney() {
+		coinReturn.addAll(balanceCoins)
+		balanceCoins = []
+		balance = 0
+		display = null
 	}
 }

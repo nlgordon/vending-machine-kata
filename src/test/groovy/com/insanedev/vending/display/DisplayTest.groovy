@@ -2,6 +2,7 @@ package com.insanedev.vending.display
 
 import com.insanedev.vending.currency.CoinType
 import com.insanedev.vending.currency.CurrencyDetector
+import com.insanedev.vending.product.Product
 import spock.lang.Specification
 
 class DisplayTest extends Specification {
@@ -48,4 +49,14 @@ class DisplayTest extends Specification {
 		assert display.display == 'INSERT COIN'
 	}
 
+	def "display shows price of cola when selected and no money has been inserted"() {
+		setup:
+		display.addProduct("A", new Product(name: "Cola", price: 1.00))
+
+		when:
+		display.selectProduct("A")
+
+		then:
+		display.display == 'PRICE $1.00'
+	}
 }

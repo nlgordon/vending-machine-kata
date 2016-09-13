@@ -17,4 +17,15 @@ class CurrencyInventoryManagerTest extends Specification {
 		then:
 		count == 0
 	}
+
+	def "the currency inventory returns the count of coins currently in the inventory"() {
+		setup:
+		manager.addInventory(CoinType.QUARTER, 1)
+
+		when:
+		int count = manager.getInventoryCount(CoinType.QUARTER)
+
+		then:
+		count == 1
+	}
 }

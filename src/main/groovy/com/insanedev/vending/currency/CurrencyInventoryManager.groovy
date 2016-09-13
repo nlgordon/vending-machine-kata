@@ -11,4 +11,7 @@ class CurrencyInventoryManager {
 		return inventory[coin]
 	}
 
+	void addInventory(CoinType type, Integer count) {
+		inventory[type] = count
+	}
 }

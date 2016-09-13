@@ -3,6 +3,7 @@ package com.insanedev.vending.display
 import com.insanedev.vending.currency.CoinType
 import com.insanedev.vending.currency.CurrencyDetector
 import com.insanedev.vending.product.Product
+import com.insanedev.vending.product.ProductInventoryManager
 import groovy.util.logging.Slf4j
 
 import java.text.NumberFormat
@@ -12,6 +13,7 @@ class Display {
 
 	// References to other application modules
 	CurrencyDetector detector = null
+	ProductInventoryManager inventoryManager = null
 
 	// Configuration of this display
 	Map<String, Product> productMap = [:]
@@ -43,6 +45,11 @@ class Display {
 
 	void selectProduct(String button) {
 		Product product = productMap[button]
+
+		if (!inventoryManager.getInventoryCount(product.name)) {
+			display = 'SOLD OUT'
+			return
+		}
 
 		if (product.price > balance) {
 			NumberFormat formatter = NumberFormat.currencyInstance

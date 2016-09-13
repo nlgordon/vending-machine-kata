@@ -9,6 +9,10 @@ class ProductInventoryManager {
 	}
 
 	int getInventoryCount(String product) {
-		return products[product]
+		if (products.containsKey(product)) {
+			return products[product]
+		}
+
+		return 0
 	}
 }

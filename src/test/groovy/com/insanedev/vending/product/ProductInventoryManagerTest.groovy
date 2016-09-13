@@ -20,4 +20,12 @@ class ProductInventoryManagerTest extends Specification {
 		then:
 		count == 2
 	}
+
+	def "the product manager returns zero if the product isn't setup"() {
+		when:
+		int count = manager.getInventoryCount("soda")
+
+		then:
+		count == 0
+	}
 }

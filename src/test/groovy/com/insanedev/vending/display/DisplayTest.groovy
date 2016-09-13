@@ -6,19 +6,10 @@ import com.insanedev.vending.product.Product
 import com.insanedev.vending.product.ProductInventoryManager
 import spock.lang.Specification
 
-class DisplayTest extends Specification {
+class DisplayTest extends BaseDisplayTest {
 
-	Display display = null;
 
 	def setup() {
-		display = new Display()
-		display.detector = Mock(CurrencyDetector)
-		display.detector.analyzeCoin(_, _, _) >> CoinType.QUARTER
-		display.inventoryManager = Mock(ProductInventoryManager)
-		display.inventoryManager.getInventoryCount(_) >> 1
-		display.addProduct("A", new Product(name: "Cola", price: 1.00))
-		display.addProduct("B", new Product(name: "Chips", price: 0.5))
-		display.addProduct("C", new Product(name: "Candy", price: 0.65))
 	}
 
 	def "insertCoin when a coin is detected, its value is added to the current balance"() {
@@ -95,6 +86,9 @@ class DisplayTest extends Specification {
 		display.coinReturn[0] == CoinType.QUARTER
 		display.coinReturn[1] == CoinType.DIME
 		display.coinReturn[2] == CoinType.NICKEL
+		1 * display.currencyInventory.decrement(CoinType.QUARTER)
+		1 * display.currencyInventory.decrement(CoinType.DIME)
+		1 * display.currencyInventory.decrement(CoinType.NICKEL)
 	}
 
 	def "when the customer requests his money be returned, the exact coins put in are returned"() {

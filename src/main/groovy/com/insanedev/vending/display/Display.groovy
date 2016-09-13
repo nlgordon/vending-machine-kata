@@ -2,6 +2,7 @@ package com.insanedev.vending.display
 
 import com.insanedev.vending.currency.CoinType
 import com.insanedev.vending.currency.CurrencyDetector
+import com.insanedev.vending.currency.CurrencyInventoryManager
 import com.insanedev.vending.product.Product
 import com.insanedev.vending.product.ProductInventoryManager
 import groovy.util.logging.Slf4j
@@ -13,7 +14,8 @@ class Display {
 
 	// References to other application modules
 	CurrencyDetector detector = null
-	ProductInventoryManager inventoryManager = null
+	ProductInventoryManager productInventory = null
+	CurrencyInventoryManager currencyInventory = null
 
 	// Configuration of this display
 	Map<String, Product> productMap = [:]
@@ -46,7 +48,7 @@ class Display {
 	void selectProduct(String button) {
 		Product product = productMap[button]
 
-		if (!inventoryManager.getInventoryCount(product.name)) {
+		if (!productInventory.getInventoryCount(product.name)) {
 			display = 'SOLD OUT'
 			return
 		}
@@ -55,11 +57,19 @@ class Display {
 			NumberFormat formatter = NumberFormat.currencyInstance
 			display = "PRICE " + formatter.format(product.price)
 		} else {
-			balance -= product.price
+			BigDecimal remainingBalance = balance - product.price
+			Map<CoinType, Integer> change = getChange(remainingBalance)
+			if (!change && remainingBalance) {
+				display = 'EXACT CHANGE ONLY'
+				return
+			}
+
+			dispenseProduct(product)
+
+			balance = remainingBalance
+			processChange(change)
 			balanceCoins = []
 			display = 'THANK YOU'
-			dispenseProduct(product)
-			makeChange()
 		}
 	}
 
@@ -68,18 +78,51 @@ class Display {
 		dispensedProducts << product
 	}
 
-	void makeChange() {
-		if (balance == 0) {
-			return
+	void processChange(Map<CoinType, Integer> change) {
+		change.each { CoinType coin, Integer count ->
+			1..count.each {
+				// Possibly wire this so that the inventory puts the coin into the return directly
+				coinReturn << coin
+
+				currencyInventory.decrement(coin)
+				balance -= coin.value
+			}
 		}
+	}
+
+	Map<CoinType, Integer> getChange(BigDecimal amount) {
+
+		if (amount == 0) {
+			return null
+		}
+
+		Map<CoinType, Integer> ret = [:]
 
 		List<CoinType> sortedCoins = CoinType.collect { it }.sort { a, b -> a.value <=> b.value }.reverse()
 
-		while (balance > 0) {
-			CoinType change = sortedCoins.find { it.value <= balance }
-			balance -= change.value
-			coinReturn << change
+		BigDecimal remainingAmount = amount
+
+		while (remainingAmount > 0) {
+			CoinType change = sortedCoins.find { it.value <= remainingAmount }
+			if (!ret[change]) {
+				ret[change] = 1
+			} else {
+				ret[change]++
+			}
+
+			remainingAmount -= change.value
 		}
+
+		if (ret.findAll { CoinType coin, Integer count ->
+			if (currencyInventory.getInventoryCount(coin) <= count) {
+				return false
+			}
+			return true
+		}.size() != ret.size()) {
+			return null
+		}
+
+		return ret
 	}
 
 	void addProduct(String button, Product product) {

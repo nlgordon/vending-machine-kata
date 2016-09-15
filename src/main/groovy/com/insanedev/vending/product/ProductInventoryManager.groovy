@@ -15,4 +15,8 @@ class ProductInventoryManager {
 
 		return 0
 	}
+
+	public Map getInventory() {
+		return products
+	}
 }

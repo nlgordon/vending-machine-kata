@@ -1,5 +1,8 @@
 package com.insanedev.vending.product
 
+import org.springframework.stereotype.Component
+
+@Component
 class ProductInventoryManager {
 
 	Map<String, Integer> products = [:]
